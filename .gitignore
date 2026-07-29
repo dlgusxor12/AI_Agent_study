@@ -1,0 +1,17 @@
+# 비밀 파일
+.env
+.env.*
+!.env.example
+
+# 파이썬
+venv/
+__pycache__/
+*.pyc
+
+# 벡터 DB / 캐시 (Part 2 이후)
+.chroma/
+chroma_db/
+*.sqlite
+
+# VS Code 개인 설정
+.vscode/
