@@ -1,4 +1,5 @@
 ## 핵심 개념
+> Part 1_1
 ### LM (Language Model) 
 - 단어 시퀀스가 주어졌을 때 다음 단어의 확률 분포를 계산하는 시스템
 
@@ -9,7 +10,7 @@ $$ P(w_t​∣w_1​,w_2​,…,w_{t−1}​) $$
 $$ P(w_1​,…,w_n​)=∏^{n}_{t=1}​P(w_t​∣w_{<t​}) $$
 
 ### LLM (Large Language Model)
-- LM을 수십억 ~ 수조 개의 파라미터, 방대한 text corpus, transformer architecture로 스케일업 한 것
+- LM을 수십억 ~ 수조 개의 parameter, 방대한 text corpus, transformer architecture로 스케일업 한 것
 
 ### Token
 - LLM이 텍스트를 처리하는 최소 단위
@@ -60,3 +61,56 @@ $$ P(w_1​,…,w_n​)=∏^{n}_{t=1}​P(w_t​∣w_{<t​}) $$
 - 추론 (Reasoning) 모델이 답을 내기 전 내부적으로 "생각"에 얼마나 많은 연산을 쓸지 조절
 - 모델이 답을 내기 전 사고 과정의 깊이·길이를 조절
 - 회사마다 명칭 다를 수 있음 (openai : reasoning effort, claude : effort, ...)
+
+<br>
+
+> Part 1_2
+
+### ChatOpenAI
+- 예시 코드
+```
+import os
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+
+load_dotenv()
+
+MODEL_NAME = "gpt-4o-mini"
+
+
+def make_llm(temperature: float = 0, max_tokens: int = 500) -> ChatOpenAI:
+    return ChatOpenAI(
+        model=MODEL_NAME, # 모델명
+        temperature=temperature, # 무작위성
+        max_tokens=max_tokens, # 최대 토큰 설정
+        api_key=os.getenv("OPENAI_API_KEY"), # API 키 마운트
+        # n = 3, 후보 답변 3개 출력 가능
+    )
+
+
+llm = make_llm()
+response = llm.invoke("LangChain을 한 문장으로 설명해줘.")
+print(response.content)
+print(response.usage_metadata)
+```
+- ```api_key=```를 명시하지 않으면 ChatOpenAI()가 자동으로 환경변수 OPENAI_API_KEY를 탐색
+  <br>  → load_dotenv()만 호출해도 동작
+
+
+### 메시지 종류
+| 역할 | 클래스 | 용도 | 넣을 내용 | 피해야 할 내용 |
+| --- | --- | --- | --- | --- |
+|system |	SystemMessage	| 모델의 정체성·규칙·제약 사항 지시	| 변하지 않는 규칙, 톤, 금지사항, 출력 형식 |	매번 바뀌는 사용자 질문 |
+|user	| HumanMessage |	사용자의 질문·요청 | 이번 요청, 입력 데이터, 질문 | 장기 정책 |
+|assistant |	AIMessage | 이전 대화에서 모델이 했던 답(멀티턴에 사용) | 이전 모델 답변, 대화 히스토리 |	사람이 만든 확정 규칙 |
+
+- 무조건 지켜야하는 규칙 : SystemMessage
+- 이번에 처리할 데이터 : HumanMessage
+
+### invoke, stream
+- invoke(input) : 답이 전부 생성될 때 까지 대기 후 한번에 반환
+- stream(input) : 토큰이 생성되는대로 조금씩 흘려보냄
+
+<br>
+
+> Part 1_3
