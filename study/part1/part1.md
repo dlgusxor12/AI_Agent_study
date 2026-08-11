@@ -1,28 +1,36 @@
 ## 핵심 개념
+>
 > Part 1_1
-### LM (Language Model) 
+>
+### LM (Language Model)
+
 - 단어 시퀀스가 주어졌을 때 다음 단어의 확률 분포를 계산하는 시스템
 
-- 다음 토큰 확률 예측 
+- 다음 토큰 확률 예측
 $$ P(w_t​∣w_1​,w_2​,…,w_{t−1}​) $$
 
-- 전체 문장의 확률 예측 
+- 전체 문장의 확률 예측
 $$ P(w_1​,…,w_n​)=∏^{n}_{t=1}​P(w_t​∣w_{<t​}) $$
 
 ### LLM (Large Language Model)
+
 - LM을 수십억 ~ 수조 개의 parameter, 방대한 text corpus, transformer architecture로 스케일업 한 것
 
 ### Token
+
 - LLM이 텍스트를 처리하는 최소 단위
 - 모델은 글자나 단어를 직접 다루지 않고, 텍스트를 토큰 시퀀스로 쪼갠 뒤 각 토큰을 정수 ID로 변환하여 처리
   - 영어 : 1 token → 4글자 → 약 0.75 단어
   - 한국어 : 1글자 → 1~3 token
 
 ### Context Window
+
 - 모델이 한 번의 추론에서 볼 수 있는 최대 토큰 수
 - 입력과 출력을 모두 합친 총량이 context window 한계 안에 들어와야 함
   - 한계를 넘으면 가장 오래된 부분이 잘려나가거나, 요청 거부
+
 > [시스템 프롬프트] + [대화 기록] + [사용자 질문] + [모델 응답]
+
 - 이유 : Self-Attention의 제곱 비용
   - Self-Attention의 계산 복잡도
     $$연산량∝O(n^2⋅d)$$
@@ -35,6 +43,7 @@ $$ P(w_1​,…,w_n​)=∏^{n}_{t=1}​P(w_t​∣w_{<t​}) $$
   3. 주의 분산 : 관련 없는 문서가 섞이면 중요한 근거를 놓칠 수 있음
 
 ### temperature
+
 - 확률 분포의 분포를 조절
   - 낮은 temperature → 분포가 뾰족해짐 → 고확률 토큰에 집중 → 결정적·보수적·일관적
   - 높은 temperature → 분포가 평평해짐 → 저확률 토큰도 뽑힐 기회 증가 → 무작위·창의적·다양성
@@ -47,17 +56,19 @@ $$ P(w_1​,…,w_n​)=∏^{n}_{t=1}​P(w_t​∣w_{<t​}) $$
   - T→0: 최고 확률 토큰만 남음 → Greedy 디코딩과 동일 (완전 결정적)
 
 - 예시
+
 <div align="center">
 
-| Temperature |	토큰 A | 토큰 B | 토큰 C | 특성 |
+| Temperature | 토큰 A | 토큰 B | 토큰 C | 특성 |
 | --- | --- | --- | --- | --- |
-| T = 0.5 | 78% |	11% |	6% | A에 강하게 집중 |
-| T = 1.0 | 59% |	22% |	13% |	원본 분포 |
-| T = 2.0 | 44% |	27% |	21% |	고르게 퍼짐 |
+| T = 0.5 | 78% | 11% | 6% | A에 강하게 집중 |
+| T = 1.0 | 59% | 22% | 13% | 원본 분포 |
+| T = 2.0 | 44% | 27% | 21% | 고르게 퍼짐 |
 
 </div>
 
 ### Reasoning Effort
+
 - 추론 (Reasoning) 모델이 답을 내기 전 내부적으로 "생각"에 얼마나 많은 연산을 쓸지 조절
 - 모델이 답을 내기 전 사고 과정의 깊이·길이를 조절
 - 회사마다 명칭 다를 수 있음 (openai : reasoning effort, claude : effort, ...)
@@ -67,7 +78,9 @@ $$ P(w_1​,…,w_n​)=∏^{n}_{t=1}​P(w_t​∣w_{<t​}) $$
 > Part 1_2
 
 ### ChatOpenAI
+
 - 예시 코드
+
 ```
 import os
 from dotenv import load_dotenv
@@ -93,28 +106,32 @@ response = llm.invoke("LangChain을 한 문장으로 설명해줘.")
 print(response.content)
 print(response.usage_metadata)
 ```
+
 - ```api_key=```를 명시하지 않으면 ChatOpenAI()가 자동으로 환경변수 OPENAI_API_KEY를 탐색
   <br>  → load_dotenv()만 호출해도 동작
 
-
 ### 메시지 종류
+
 | 역할 | 클래스 | 용도 | 넣을 내용 | 피해야 할 내용 |
 | --- | --- | --- | --- | --- |
-|system |	SystemMessage	| 모델의 정체성·규칙·제약 사항 지시	| 변하지 않는 규칙, 톤, 금지사항, 출력 형식 |	매번 바뀌는 사용자 질문 |
-|user	| HumanMessage |	사용자의 질문·요청 | 이번 요청, 입력 데이터, 질문 | 장기 정책 |
-|assistant |	AIMessage | 이전 대화에서 모델이 했던 답(멀티턴에 사용) | 이전 모델 답변, 대화 히스토리 |	사람이 만든 확정 규칙 |
+| system | SystemMessage | 모델의 정체성·규칙·제약 사항 지시 | 변하지 않는 규칙, 톤, 금지사항, 출력 형식 | 매번 바뀌는 사용자 질문 |
+| user | HumanMessage | 사용자의 질문·요청 | 이번 요청, 입력 데이터, 질문 | 장기 정책 |
+| assistant | AIMessage | 이전 대화에서 모델이 했던 답(멀티턴에 사용) | 이전 모델 답변, 대화 히스토리 | 사람이 만든 확정 규칙 |
 
 - 무조건 지켜야하는 규칙 : SystemMessage
 - 이번에 처리할 데이터 : HumanMessage
 
 ### invoke, stream
+
 - invoke(input) : 답이 전부 생성될 때 까지 대기 후 한번에 반환
 - stream(input) : 토큰이 생성되는대로 조금씩 흘려보냄
 
 <br>
 
 > Part 1_3
+>
 ### LangChain 구성요소
+
 - LangChain → 파이프라인 도구 모음
 - 주요 구성 요소
 
@@ -148,13 +165,17 @@ Application: 화면 출력, DB 저장, 다음 체인 입력
 > Part 1_4
 
 ### 프롬프트 템플릿
+
 - 같은 질문 구조를 여러 번 사용할 때 하드코딩 방식이 아닌 변수화해 사용하는 것
 - 적용 x
+
 ```
 llm.invoke("다음 리뷰를 긍정/부정으로 분류해 주세요.\n리뷰: 배송이 늦었지만 품질은 만족합니다")
 llm.invoke("다음 리뷰를 긍정/부정으로 분류해 주세요.\n리뷰: 최악이에요 환불 요청합니다")
 ```
+
 - 적용 o : {review} 자리에만 문자열을 교체하여 사용
+
 ```
 prompt = ChatPromptTemplate.from_messages([
     ("system", "리뷰를 긍정/부정으로 분류해 주세요."),
@@ -163,13 +184,15 @@ prompt = ChatPromptTemplate.from_messages([
 ```
 
 ### ChatPromptTemplate vs PromptTemplate
-| 클래스 | 출력 형태 |	사용 |
+
+| 클래스 | 출력 형태 | 사용 |
 | --- | --- | --- |
-| ChatPromptTemplate |	메시지 리스트 (system/user/assistant) |	챗 모델(ChatOpenAI 등)에 거의 항상 사용. 기본 선택지 |
-| PromptTemplate |	단일 문자열 |	레거시 LLM, 또는 문자열 하나만 필요한 경우 |
+| ChatPromptTemplate | 메시지 리스트 (system/user/assistant) | 챗 모델(ChatOpenAI 등)에 거의 항상 사용. 기본 선택지 |
+| PromptTemplate | 단일 문자열 | 레거시 LLM, 또는 문자열 하나만 필요한 경우 |
 
 - 보통의 경우 ChatPromptTemplate에서 system message에 변하지 않는 규칙, 사용자 입력에는 텍스트를 입력
 - 예시
+
 ```
 prompt = ChatPromptTemplate.from_messages([
     ("system", "너는 보안 원칙을 지키는 업무 메일 작성 도우미다. 개인정보는 마스킹한다."),
@@ -178,15 +201,18 @@ prompt = ChatPromptTemplate.from_messages([
 ```
 
 ### 메시지 역할
-|역할 문자열 |	의미 |
+
+| 역할 문자열 | 의미 |
 | --- | --- |
-|`"system"` |	모델의 정체성·규칙 (페르소나, 출력 형식 지시 등) |
-|`"user"` / `"human"` |	사용자가 보낸 메시지 |
-|`"assistant"` / `"ai"` |	이전 대화에서 모델이 했던 답 (멀티턴 예시 제공 시 사용) |
+| `"system"` | 모델의 정체성·규칙 (페르소나, 출력 형식 지시 등) |
+| `"user"` / `"human"` | 사용자가 보낸 메시지 |
+| `"assistant"` / `"ai"` | 이전 대화에서 모델이 했던 답 (멀티턴 예시 제공 시 사용) |
 
 ### 사용 함수
+
 - `format_messages()`
   - 템플릿을 실행 가능한 메시지 리스트로 렌더링 하는 함수
+
 ```
 msgs = prompt.format_messages(role="고양이 박사", topic="발바닥", style="귀여운")
 # msgs → [SystemMessage(...), HumanMessage(...)]
@@ -195,6 +221,7 @@ llm.invoke(msgs)
 
 - `partial()`
   - 일부 변수를 미리 고정하는 함수
+
 ```
 base = ChatPromptTemplate.from_messages([
     ("system", "너는 {role}이야. 답변은 {language}로 해줘."),
@@ -213,21 +240,27 @@ msgs = korean_prompt.format_messages(role="요리사", question="계란말이 �
 > Part 1_5
 
 ### 프롬프트 엔지니어링 기법
+
 ### zero-shot
-  - 예시 없이 지시만 주고 바로 시키는 방식
+
+- 예시 없이 지시만 주고 바로 시키는 방식
+
 ```
 다음 문장의 감정을 긍정/부정으로 분류하세요.
 
 "이 영화 정말 최고였어!"
 ```
-  - 원리 : 모델이 pre-training 과정에서 이미 해당 과제 유형을 접했을 것이라 가정하고, 예시 없이 지시만으로 수행하게 함
-  - 장점 : 프롬프트가 짧고 간단, 토큰 절약
-  - 단점 : 과제가 모호하거나 특수한 출력 형식이 필요하면 성능이 불안정
+
+- 원리 : 모델이 pre-training 과정에서 이미 해당 과제 유형을 접했을 것이라 가정하고, 예시 없이 지시만으로 수행하게 함
+- 장점 : 프롬프트가 짧고 간단, 토큰 절약
+- 단점 : 과제가 모호하거나 특수한 출력 형식이 필요하면 성능이 불안정
 
 ### few-shot
+
 - 몇 개의 예시를 프롬프트에 넣어 패턴을 보여주는 방식
 - 예시가 1개면 one-shot, 여러 개면 few-shot
 - 예시는 3개 정도가 효과적 (너무 많으면 편향 가능성)
+
 ```
 문장의 감정을 분류하세요.
 
@@ -236,13 +269,16 @@ msgs = korean_prompt.format_messages(role="요리사", question="계란말이 �
 문장: "그냥 그랬어요." → 중립
 문장: "다시는 안 살 거예요." →
 ```
-  - 원리 : In-Context Learning 기법. 내부 parameter를 변경하지 않고 프롬프트 내 예시만으로 과제를 학습
-  - 장점 : 출력 형식·톤·기준을 예시로 정확히 통제 가능
-  - 단점 : 토큰 소모 증가, 예시 선택·순서에 성능이 민감
+
+- 원리 : In-Context Learning 기법. 내부 parameter를 변경하지 않고 프롬프트 내 예시만으로 과제를 학습
+- 장점 : 출력 형식·톤·기준을 예시로 정확히 통제 가능
+- 단점 : 토큰 소모 증가, 예시 선택·순서에 성능이 민감
 
 ### CoT (Chain of Thought)
+
 - 모델이 답을 바로 내지 않고 중간 추론 단계를 단계별로 서술하게 유도하는 기법
   - 추론 모델은 CoT를 프롬프트로 유도하지 않아도 모델 내부에서 자동으로 수행하도록 학습
+
 ```
 Q: 카페에 사과가 23개 있었다. 20개를 팔고 6개를 더 들여왔다.
    지금 사과는 몇 개인가? 단계별로 생각해봐.
@@ -252,15 +288,18 @@ A: 처음에 23개 있었다.
    6개를 더 들여왔으니 3 + 6 = 9개.
    따라서 답은 9개다.
 ```
-  - zero-shot CoT : "Let's think step by step"같은 문장으로 추론을 유도하는 방식
-  - few-shot CoT : 추론 과정이 포함된 예시를 몇 개 보여주고, 해당 스타일을 따라하도록 유도하는 방식
+
+- zero-shot CoT : "Let's think step by step"같은 문장으로 추론을 유도하는 방식
+- few-shot CoT : 추론 과정이 포함된 예시를 몇 개 보여주고, 해당 스타일을 따라하도록 유도하는 방식
   
-  - 확장
-    - Self-Consistency : CoT를 여러 번 수행해 나온 답들 중 다수결로 최종 답을 선택하는 방식
-    - ToT(Tree of Thought) : 추론을 한 줄기가 아니라 여러 갈래로 탐색하는 방식
+- 확장
+  - Self-Consistency : CoT를 여러 번 수행해 나온 답들 중 다수결로 최종 답을 선택하는 방식
+  - ToT(Tree of Thought) : 추론을 한 줄기가 아니라 여러 갈래로 탐색하는 방식
 
 ### Role Prompting
+
 - 모델에게 특정 역할·페르소나를 부여해 해당 관점·톤·전문성으로 답하게 하는 기법
+
 ```
 당신은 20년 경력의 시니어 백엔드 엔지니어입니다.
 주니어 개발자가 이해할 수 있도록, 아래 코드의 문제점을
@@ -268,11 +307,14 @@ A: 처음에 23개 있었다.
 
 [코드]
 ```
-  - 원리 : 열할을 지정하면 모델의 응답이 그 역할에 맞는 스타일로 유도됨. pre-traning 과정에서 학습한 분포를 활성화
-  - system 메시지로 role 부여하는 방법이 효과적
+
+- 원리 : 열할을 지정하면 모델의 응답이 그 역할에 맞는 스타일로 유도됨. pre-traning 과정에서 학습한 분포를 활성화
+- system 메시지로 role 부여하는 방법이 효과적
 
 ### Good Prompt
+
 - 기법들을 다양하게 섞어서 사용하는 것도 효과적
+
 ```
 [Role] 당신은 수학 교사입니다.
 [Few-shot + CoT] 아래 예시처럼 단계별로 풀어주세요.
@@ -282,15 +324,151 @@ A: 처음에 23개 있었다.
 
 - 5요소
 
-| 요소 |	질문 |
+| 요소 | 질문 |
 | --- | --- |
-| 역할 |	모델이 어떤 관점으로 답해야 하는가 |
-| 목표	| 최종 산출물이 무엇인가 |
-| 입력	| 어떤 데이터를 근거로 삼아야 하는가 |
-| 제약	| 길이, 톤, 금지사항, 형식은 무엇인가 |
-| 평가 기준	| 좋은 답과 나쁜 답을 어떻게 구분하는가 |
+| 역할 | 모델이 어떤 관점으로 답해야 하는가 |
+| 목표 | 최종 산출물이 무엇인가 |
+| 입력 | 어떤 데이터를 근거로 삼아야 하는가 |
+| 제약 | 길이, 톤, 금지사항, 형식은 무엇인가 |
+| 평가 기준 | 좋은 답과 나쁜 답을 어떻게 구분하는가 |
 
 - 프롬프트 개선 방법
   1. 명확한 지시
   2. 예시 제공
   3. 출력 형식 지정
+
+<br>
+
+> Part 1_6
+
+### LCEL (Langchain Expression Language)
+
+- 체인을 객체들의 파이프라인처럼 쓰기 위해 파이썬의 "|" 연산자를 사용하여 표현
+- 만들어진 결과는 클래스 이름이 `RunnableSequence`인 객체
+- `.steps`에 구성 요소가 리스트로 들어있음
+- 지원 요소
+  - `invoke()` : 단일 실행
+  - `stream()` : 스트리밍
+  - `batch()` : 병렬 배치
+  - `ainvoke()` : 비동기
+  - `.with_config()` : 설정 주입 (태그, 메타데이터)
+
+`
+chain = prompt | llm | parser
+`
+
+- 프롬프트 생성 → llm 호출 → parser로 가공
+
+<br>
+
+> Part 1_7
+>
+### 복합 체인 생성
+- LCEL을 이용해서 작은 체인을 여러개의 큰 체인으로 합성
+
+### `RunnablePassthrough` : 그대로 통과
+- 체인 중간에서 원본 입력이나 앞 단계 결과의 일부를 가공 없이 다음 단계로 넘기고 싶을 때 사용
+
+### `RunnableParallel` : 여러 체인을 동시에
+- 여러 Runnable 체인을 병렬로 실행하고 결과를 dict로 반환
+
+```
+# 명시적
+parallel = RunnableParallel(
+    summary=summary_chain,
+    keywords=keyword_chain,
+)
+
+# 단축 (동일하게 동작)
+parallel = {"summary": summary_chain, "keywords": keyword_chain}
+```
+
+### 선택 기준
+| 구조 |	사용 조건 |	예시 |
+| --- | --- | --- |
+| 순차 체인 |	B가 A의 결과를 필요로 함 |	영어 요약 → 한국어 번역 |
+| 병렬 체인 |	여러 작업이 같은 입력을 독립적으로 처리 |	감성 분석 + 키워드 추출 + 요약 | 
+| 혼합 체인 |	병렬 결과를 모아 다음 단계에서 사용 |	요약/키워드/감성을 모아 보고서 작성 |
+
+> Part 1_8
+### `Runnable`
+- Langchain의 대부분 컴포넌트의 부모 클래스
+  - `ChatPromptTemplate, ChatOpenAI, StrOutputParser, RunnableParallel`, ...
+
+### `Runnable`이 제공하는 메소드
+
+|상황 |	권장 메서드 |	이유 | 반환 방식 |
+| --- | --- | --- | --- | 
+| 스크립트 하나, 질문 하나 등 입력 1개를 처리할 때 | `invoke()` |	가장 단순 | 최종 결과 1개 |
+| 챗봇 UI, 긴 답변 등 여러 입력을 한 번에 처리할 때 |	`stream()` |	사용자가 기다리지 않음 | chunk 반복자 |
+| 문서 100개 요약 등 긴 답변을 화면에 즉시 보여줄 때 |	`batch()` |	내부 병렬화로 빠름 | 결과 리스트 |
+| FastAPI 등 async 웹 서버에서 블로킹을 피할 때 |	`ainvoke()` / `astream()` |	이벤트 루프 블로킹 방지 | 	await 가능한 결과 / async chunk 반복자 |
+| 대규모 비동기 배치 등 async 환경에서 스트리밍할 때 |	`abatch()` |	동시 처리 최대화 |
+
+### 동기 vs 비동기
+- 동기(sync) : 한 호출이 끝날 때까지 다음 줄이 기다림. 대부분의 스크립트·CLI 도구
+- 비동기(async) : `await`로 "기다리는 동안 다른 일"을 할 수 있음. 웹 서버·실시간 UI
+
+### batch 주의사항
+- 여러 입력을 편하게 처리하지만, 무제한으로 던지면 API Limit에 걸릴 수 있어 `max_concurrency`를 제한
+- 처음에 제한 두고 차근차근 올려가는게 좋음
+```
+results = chain.batch(
+    inputs,
+    config={"max_concurrency": 3},
+)
+```
+
+### `RunnableLambda`
+- 일반 함수를 체인에 삽입가능
+  - 예시 : LLM 응답을 소문자로 변환, 문자열을 JSON 파싱 후 특정 필드만 뽑기, 입력 dict에 기본값 채워넣기, 조건에 따라 다른 체인으로 분기 등
+
+- 결과 대문자 변환 예시 코드
+```
+from langchain_core.runnables import RunnableLambda
+
+def shout(text: str) -> str:
+    return text.upper() + "!!!"
+
+chain = prompt | llm | StrOutputParser() | RunnableLambda(shout)
+```
+
+<br>
+
+> Part 1_9
+
+### Output Parser
+- `llm.invoke()` -> `AIMessage` 객체
+  - `AIMessage`의 `.content` -> 자연어 문자열
+    - Parser를 이용해서 자연어 정제
+
+### Parser 종류
+- 대표 3가지
+
+| 파서 |	입력 타입 |	출력 타입	| 용도 |
+|---| --- | --- | --- |
+|StrOutputParser|	AIMessage|	str	|그냥 본문 텍스트만 빼올 때 (가장 기본)|
+|JsonOutputParser|	AIMessage|	dict / list|	JSON 형태 응답을 dict로|
+|PydanticOutputParser|	AIMessage|	Pydantic 모델 객체|	타입 안전한 구조화 출력|
+
+- Parser 선택 기준
+
+|상황 |	권장 방식|
+| --- | --- |
+|그냥 문자열이면 충분 |	`StrOutputParser` |
+|JSON dict가 필요하지만 검증은 약해도 됨	| `JsonOutputParser` |
+|타입 검증과 필수 필드가 중요	| `PydanticOutputParser` 또는 `with_structured_output` |
+|OpenAI 등 구조화 출력을 잘 지원하는 모델	| `with_structured_output(Schema)` 우선 |
+|모델 제공자가 구조화 출력을 약하게 지원	| 프롬프트 + `PydanticOutputParser` |
+
+- Pydantic 예시
+- Field, description을 이용하여 정의
+```
+from pydantic import BaseModel, Field
+
+class MeetingSummary(BaseModel):
+    topic: str = Field(description="회의 주제")
+    attendees: list[str] = Field(description="참석자 이름 목록")
+    decisions: list[str] = Field(description="결정 사항")
+```
+
