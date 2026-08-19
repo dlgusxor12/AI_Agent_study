@@ -5,3 +5,10 @@ python-dotenv>=1,<2
 tiktoken>=0.3,<1
 playwright
 grandalf
+langchain-community
+pypdf
+beautifulsoup4
+unstructured
+chromadb
+langchain-chroma
+langchain-core
