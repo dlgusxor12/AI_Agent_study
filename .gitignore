@@ -17,4 +17,4 @@ chroma_db/
 .vscode/
 
 # 데이터 파일 문서
-.data/
+data/

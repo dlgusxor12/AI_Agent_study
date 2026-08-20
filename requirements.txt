@@ -12,3 +12,5 @@ unstructured
 chromadb
 langchain-chroma
 langchain-core
+ddgs
+langgraph-checkpoint-sqlite
